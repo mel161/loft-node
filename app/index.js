@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 const yargs = require('yargs');
 const directory = require('./directory');
 
@@ -21,22 +22,12 @@ const argv = yargs
 const srcPath = argv.src;
 const destPath = argv.dest;
 
-directory.create(destPath, err => {
-  if (err) {
-    if (err.code === 'EEXIST') {
-      console.error('Directory already exists. Abort.');
-      process.exit(1);
-    } else {
-      console.error(err);
-      process.exit(1);
-    }
-  }
+const copyFile = util.promisify(fs.copyFile);
 
-  directory.read(srcPath, (err, files) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
+async function sortCollection () {
+  try {
+    await directory.create(destPath);
+    let files = await directory.read(srcPath);
 
     files = files.filter(file => {
       return !/^\./.test(file.name);
@@ -44,27 +35,21 @@ directory.create(destPath, err => {
 
     let counter = 0;
 
-    files.forEach(file => {
+    files.forEach(async file => {
       const firstLetter = file.name[0];
       const dirPath = path.join(destPath, firstLetter);
 
-      directory.create(dirPath, err => {
-        if (err && err.code !== 'EEXIST') {
-          console.error(err);
-          process.exit(1);
-        }
+      await directory.create(dirPath);
+      await copyFile(file.path, path.join(dirPath, file.name));
 
-        fs.copyFile(file.path, path.join(dirPath, file.name), err => {
-          if (err) {
-            console.error(err);
-            process.exit(1);
-          }
-
-          if (++counter === files.length) {
-            console.log('Your collection was successfully sorted!');
-          }
-        });
-      });
+      if (++counter === files.length) {
+        console.log('Your collection was successfully sorted!');
+      }
     });
-  });
-});
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+}
+
+sortCollection();

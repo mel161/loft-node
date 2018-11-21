@@ -1,67 +1,54 @@
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 
-function createDir (path, callback) {
-  fs.access(path, fs.constants.F_OK, err => {
-    if (!err) {
-      const err = new Error('Directory exist');
-      err.code = 'EEXIST';
-      return callback(err);
+const mkdir = util.promisify(fs.mkdir);
+const readdir = util.promisify(fs.readdir);
+const stat = util.promisify(fs.stat);
+
+async function createDir (path) {
+  try {
+    await mkdir(path);
+    return;
+  } catch (err) {
+    if (err.code === 'EEXIST') {
+      return;
     }
 
-    fs.mkdir(path, err => {
-      if (err) {
-        return callback(err);
-      }
-
-      callback(null);
-    });
-  });
+    throw err;
+  }
 }
 
-function readDir (dirpath, callback) {
+async function readDir (dirpath) {
   let results = [];
-  fs.readdir(dirpath, (err, files) => {
-    if (err) {
-      callback(err, null);
-    }
-
+  try {
+    const files = await readdir(dirpath);
     let counter = files.length;
 
     if (counter === 0) {
-      return callback(null, results);
+      return results;
     }
 
-    files.forEach(file => {
+    for (const file of files) {
       const filepath = path.join(dirpath, file);
+      const stats = await stat(filepath);
 
-      fs.stat(filepath, (err, stats) => {
-        if (err) {
-          callback(err, null);
+      if (stats.isDirectory()) {
+        const res = await readDir(filepath);
+        results = results.concat(res);
+        if (--counter === 0) {
+          return results;
         }
-
-        if (stats.isDirectory()) {
-          readDir(filepath, (err, res) => {
-            if (err) {
-              callback(err, null);
-            }
-
-            results = results.concat(res);
-
-            if (--counter === 0) {
-              callback(null, results);
-            }
-          });
-        } else {
-          results.push({ name: file, path: filepath });
-
-          if (--counter === 0) {
-            callback(null, results);
-          }
+      } else {
+        results.push({ name: file, path: filepath });
+        if (--counter === 0) {
+          return results;
         }
-      });
-    });
-  });
+      }
+    }
+  } catch (err) {
+    throw err;
+  }
 }
 
 module.exports = {
