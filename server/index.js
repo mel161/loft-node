@@ -1,34 +1,32 @@
-const express = require(`express`);
+const Koa = require('koa');
 const path = require('path');
-const session = require('express-session');
-
+const session = require("koa-session");
+const static = require("koa-static");
+const Pug = require('koa-pug');
 const router = require(`./router`);
 
-const app = express();
-
-app.use(session({
-  secret: 'loftschool',
-  key: 'key',
-  cookie: {
-    path: '/',
-    httpOnly: true,
-    maxAge: null
-  },
-  saveUninitialized: false,
-  resave: false
-}));
-
-app.use(express.static(`server/static`));
-
-app.set('views', 'client/template/pages');
-app.set('view engine', 'pug');
-
-app.use(`/`, router);
-
-app.get(`*`, (_, res) => {
-  res.status(404);
-  return res.render(`error`, {title: 404, message: 'Страница не найдена'});
+const app = new Koa();
+const pug = new Pug({ 
+  viewPath: 'client/template/pages', 
+  pretty: true, 
+  basedir: 'client/template', 
+  noCache: true, 
+  app: app 
 });
+
+app
+  .use(static('server/static'))
+  .use(session({
+    "key": "key",
+    "maxAge": "session",
+    "overwrite": true,
+    "httpOnly": true,
+    "signed": false,
+    "rolling": false,
+    "renew": false
+  }, app))
+  .use(router.routes())
+  .use(router.allowedMethods());
 
 const HOSTNAME = process.env.SERVER_HOST || `127.0.0.1`;
 const PORT = process.env.SERVER_PORT || 3000;

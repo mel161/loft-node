@@ -8,11 +8,14 @@
     "start": "nodemon --ext js index.js"
   },
   "dependencies": {
-    "body-parser": "^1.18.3",
-    "express": "^4.16.3",
-    "express-session": "^1.15.6",
     "formidable": "^1.2.1",
     "jquery": "^3.3.1",
+    "koa": "^2.5.1",
+    "koa-body": "^4.0.3",
+    "koa-pug": "^3.0.0-2",
+    "koa-router": "^7.4.0",
+    "koa-session": "^5.8.1",
+    "koa-static": "^5.0.0",
     "nconf": "^0.10.0",
     "nodemailer": "^4.6.7",
     "normalize.css": "^7.0.0",

@@ -1,14 +1,14 @@
 const db = require('../store')();
 
-const controller = (req, res, next) => {
-  if (req.session.isAdmin) {
-    return res.render('admin', {
-      msgfile: req.query.msgfile,
-      msgskill: req.query.msgskill,
+const controller = async (ctx, next) => {
+  if (ctx.session.isAdmin) {
+    return ctx.render('admin', {
+      msgfile: ctx.query.msgfile,
+      msgskill: ctx.query.msgskill,
       skills: db.stores.skills.store
     });
   } else {
-    return res.redirect('/login');
+    return ctx.redirect('/login');
   }
   next();
 };

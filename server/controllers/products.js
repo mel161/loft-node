@@ -1,53 +1,45 @@
-const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
+const rename = util.promisify(fs.rename);
+const unlink = util.promisify(fs.unlink);
 const db = require('../store')();
 
-const controller = (req, res, next) => {
-  let form = new formidable.IncomingForm();
-  let upload = path.join('./static', 'img', 'products');
-  let fileName;
+const controller = async (ctx, next) => {
+  const files = ctx.request.files.photo;
+  const fields = ctx.request.body;
 
-  form.uploadDir = path.join(process.cwd(), 'server', upload);
+  if (files.name === '' || files.size === 0) {
+    await unlink(files.path);
+    return ctx.redirect('/admin?msgfile=No picture uploaded!');
+  }
 
-  form.parse(req, function (err, fields, files) {
-    if (err) {
-      return next(err);
-    }
+  if (!fields.name) {
+    await unlink(files.path);
+    return ctx.redirect('/admin?msgfile=No description specified!');
+  }
 
-    if (files.photo.name === '' || files.photo.size === 0) {
-      fs.unlinkSync(files.photo.path);
-      return res.redirect('/admin?msgfile=Не загружена картинка!');
-    }
+  const isNotNumber = parseInt(fields.price, 10) === NaN;
+  if (!fields.price || isNotNumber) {
+    await unlink(files.path);
+    return ctx.redirect('/admin?msgfile=Not the price!');
+  }
 
-    if (!fields.name) {
-      fs.unlinkSync(files.photo.path);
-      return res.redirect('/admin?msgfile=Не указано описание!');
-    }
+  let fileName = path.join(process.cwd(), '/server/static/img/products/', files.name);
+  const error = await rename(files.path, fileName);
+  if (error) {
+    await unlink(fileName);
+    await rename(files.path, fileName);
+  }
+  let dir = fileName.substr(fileName.indexOf('img'));
+  db.stores.products.store.push({
+    'name': fields.name,
+    'price': fields.price,
+    'src': dir
+  });
+  db.save();
 
-    const isNotNumber = parseInt(fields.price, 10) === NaN;
-    if (!fields.price || isNotNumber) {
-      fs.unlinkSync(files.photo.path);
-      return res.redirect('/admin?msgfile=Не указана цена!');
-    }
-
-    fileName = path.join(form.uploadDir, files.photo.name);
-    fs.rename(files.photo.path, fileName, function (err) {
-      if (err) {
-        fs.unlinkSync(fileName);
-      }
-      let dir = fileName.substr(fileName.indexOf('img'));
-      console.log(fileName);
-      console.log(dir);
-      db.stores.products.store.push({
-        'name': fields.name,
-        'price': fields.price,
-        'src': dir
-      });
-      db.save();
-      res.redirect('/admin?msgfile=Картинка успешно загружена');
-    })
-  })
+  ctx.redirect('/admin?msgfile=The picture is successfully loaded');
 };
 
 module.exports = controller;

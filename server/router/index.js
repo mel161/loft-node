@@ -1,5 +1,5 @@
-const { Router } = require(`express`);
-const bodyParser = require(`body-parser`);
+const Router = require('koa-router');
+const koaBody = require('koa-body');
 const fs = require('fs');
 
 const pageController = require('../controllers/page');
@@ -10,30 +10,35 @@ const productsController = require('../controllers/products');
 const skillsController = require('../controllers/skills');
 
 const router = new Router();
-
-const jsonParser = bodyParser.json();
-const urlencodedParser = bodyParser.urlencoded({extended: false});
-
 let icon, robot;
 
-router.get('/favicon.ico', (req, res, next) => {
+router.get('/favicon.ico', async (ctx, next) => {
   if (!icon) icon = fs.readFileSync(process.cwd() + '/server/static/favicon.ico');
-  res.type('image/x-icon');
-  res.send(icon);
+  ctx.type = 'image/x-icon';
+  ctx.body = icon;
 });
 
-router.get('/robot.txt', (req, res, next) => {
+router.get('/robot.txt', async (ctx, next) => {
   if (!robot) robot = fs.readFileSync(process.cwd() + '/server/static/robots.txt');
-  res.type('text/plain');
-  res.send(robot);
+  ctx.type = 'text/plain';
+  ctx.body = robot;
 });
 
-router.get(`/`, pageController);
-router.post(`/`, jsonParser, urlencodedParser, mailController);
-router.get(`/login`, loginController.get);
-router.post(`/login`, jsonParser, urlencodedParser, loginController.post);
-router.post(`/products`, productsController);
-router.post(`/skills`, jsonParser, urlencodedParser, skillsController);
-router.get(`/admin`, adminController);
+router.get('/', pageController);
+router.post('/', koaBody(), mailController);
+router.get('/login', loginController.get);
+router.post('/login', koaBody(), loginController.post);
+router.post('/products', koaBody({
+  formidable: {
+    uploadDir: process.cwd() + '/server/static/img/products/'
+  },
+  multipart: true
+}), productsController);
+router.post('/skills', koaBody(), skillsController);
+router.get('/admin', adminController);
+
+router.get('*', async (ctx, next) => {
+  ctx.render('error');
+});
 
 module.exports = router;

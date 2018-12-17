@@ -1,7 +1,8 @@
 const db = require('../store')();
 
-const controller = (req, res) => {
-  const { age, concerts, cities, years } = req.body;
+const controller = async (ctx, next) => {
+  const { age, concerts, cities, years } = ctx.request.body;
+  console.log(age, concerts, cities, years);
   const data = db.stores.skills.store;
   let isValid = true;
 
@@ -15,11 +16,11 @@ const controller = (req, res) => {
   });
 
   if (!isValid) {
-    return res.redirect('/admin?msgskill=некорректно');
+    return ctx.redirect('/admin?msgskill=incorrect');
   }
 
   db.save();
-  return res.redirect('/admin?msgskill=обновлено');
+  ctx.redirect('/admin?msgskill=refresh');
 };
 
 module.exports = controller;
