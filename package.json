@@ -1,31 +1,33 @@
 {
   "name": "loft-node.local",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon --ext js index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mel161/loft-node.git"
+  "dependencies": {
+    "formidable": "^1.2.1",
+    "jquery": "^3.3.1",
+    "koa": "^2.5.1",
+    "koa-body": "^4.0.3",
+    "koa-pug": "^3.0.0-2",
+    "koa-router": "^7.4.0",
+    "koa-session": "^5.8.1",
+    "koa-static": "^5.0.0",
+    "nconf": "^0.10.0",
+    "nodemailer": "^4.6.7",
+    "normalize.css": "^7.0.0",
+    "pug": "^2.0.3"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/mel161/loft-node/issues"
-  },
-  "homepage": "https://github.com/mel161/loft-node#readme",
-  "dependencies": {},
   "devDependencies": {
     "eslint": "^5.9.0",
-    "eslint-config-prettier": "^3.3.0",
-    "eslint-config-prettier-standard": "^2.0.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^8.0.0",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "prettier": "^1.15.2"
+    "nodemon": "^1.18.6"
   }
 }
