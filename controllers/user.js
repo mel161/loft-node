@@ -87,7 +87,7 @@ exports.SaveAvatar = (req, res) => {
           .quality(50)
           .write(resizeAvatar);
       });
-      const response = {path: avatarPath};
+      const response = {path: resizeAvatar};
       res.status(200).send(response);
     })
     .catch((err) => {
