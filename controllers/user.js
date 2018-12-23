@@ -77,7 +77,7 @@ exports.Delete = (req, res) => {
 
 exports.SaveAvatar = (req, res) => {
   const avatarPath = path.join('./public/images/upload/', req.file.filename);
-  const resizeAvatar = path.join('./public/assets/img/avatars', req.file.filename);
+  const resizeAvatar = path.join('./public/assets/img/avatars/', req.file.filename);
   db.User
     .update({Avatar: avatarPath}, {where: {Id: req.params.id}})
     .then(() => {
