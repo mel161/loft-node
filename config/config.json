@@ -1,0 +1,26 @@
+{
+  "development": {
+    "port": 3000,
+    "authSecret": "loftschool-node",
+    "database": {
+      "host": "127.0.0.1",
+      "name": "homework-05",
+      "username": "postgres",
+      "port": 5432,
+      "password": "null",
+      "ssl": false
+    }
+  },
+  "production": {
+    "port": 3000,
+    "authSecret": "loftschool-node",
+    "database": {
+      "host": "ec2-54-247-125-116.eu-west-1.compute.amazonaws.com",
+      "name": "d87dnkr4a6uuhg",
+      "username": "spsoxohemxqzvp",
+      "port": 5432,
+      "password": "2aad1904128aed7c4c4c67bf1dbb1a6e710019212620a9f01c15bdbf4af1fb61",
+      "ssl": true
+    }
+  }
+}
