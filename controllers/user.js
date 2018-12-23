@@ -81,7 +81,7 @@ exports.SaveAvatar = (req, res) => {
   db.User
     .update({Avatar: avatarPath}, {where: {Id: req.params.id}})
     .then(() => {
-      jimp.read(resizeAvatar, (err, image) => {
+      jimp.read(avatarPath, (err, image) => {
         if (err) throw err;
         image.resize(250, 250)
           .quality(50)
